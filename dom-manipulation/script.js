@@ -1,7 +1,8 @@
-// Initialize quotes: Load from Local Storage or use defaults if empty
+// Initialize quotes array from Local Storage or default values
 let quotes = JSON.parse(localStorage.getItem('quotes')) || [
-    { text: "The only limit to our realization of tomorrow is our doubts of today.", category: "Inspiration" },
-    { text: "Quality is not an act, it is a habit.", category: "Motivation" }
+    { text: "The only way to do great work is to love what you do.", category: "Career" },
+    { text: "Innovation distinguishes between a leader and a follower.", category: "Leadership" },
+    { text: "Stay hungry, stay foolish.", category: "Life" }
 ];
 
 /**
@@ -12,52 +13,102 @@ function saveQuotes() {
 }
 
 /**
- * Displays a random quote and saves the 'last viewed quote' to Session Storage
+ * Dynamically populates the category dropdown menu
  */
-function showRandomQuote() {
-    const quoteDisplay = document.getElementById('quoteDisplay');
-    const randomIndex = Math.floor(Math.random() * quotes.length);
-    const quote = quotes[randomIndex];
+function populateCategories() {
+    const categoryFilter = document.getElementById('categoryFilter');
+    const uniqueCategories = [...new Set(quotes.map(quote => quote.category))];
 
-    quoteDisplay.innerHTML = `<p>"${quote.text}"</p><p><em>- ${quote.category}</em></p>`;
+    // Preserve the 'All Categories' option
+    categoryFilter.innerHTML = '<option value="all">All Categories</option>';
 
-    // Session Storage: Store the last viewed quote for the duration of the tab session
-    sessionStorage.setItem('lastQuote', JSON.stringify(quote));
+    uniqueCategories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        categoryFilter.appendChild(option);
+    });
+
+    // Restore last selected filter from Local Storage
+    const lastFilter = localStorage.getItem('lastSelectedFilter') || 'all';
+    categoryFilter.value = lastFilter;
 }
 
 /**
- * Adds a new quote and persists it to Local Storage
+ * Displays a random quote based on the current filter
+ */
+function showRandomQuote() {
+    const categoryFilter = document.getElementById('categoryFilter').value;
+    const filteredQuotes = categoryFilter === 'all' 
+        ? quotes 
+        : quotes.filter(q => q.category === categoryFilter);
+
+    const quoteDisplay = document.getElementById('quoteDisplay');
+
+    if (filteredQuotes.length === 0) {
+        quoteDisplay.innerHTML = "No quotes found for this category.";
+        return;
+    }
+
+    const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
+    const quote = filteredQuotes[randomIndex];
+
+    quoteDisplay.innerHTML = `
+        <p><strong>"${quote.text}"</strong></p>
+        <p><em>Category: ${quote.category}</em></p>
+    `;
+
+    // Session Storage: Remember the last viewed quote in this session
+    sessionStorage.setItem('lastViewedQuote', JSON.stringify(quote));
+}
+
+/**
+ * Filters quotes and saves the preference to Local Storage
+ */
+function filterQuotes() {
+    const selectedCategory = document.getElementById('categoryFilter').value;
+    localStorage.setItem('lastSelectedFilter', selectedCategory);
+    showRandomQuote();
+}
+
+/**
+ * Adds a new quote, updates the UI, and persists to Local Storage
  */
 function addQuote() {
-    const text = document.getElementById('newQuoteText').value;
-    const category = document.getElementById('newQuoteCategory').value;
+    const textInput = document.getElementById('newQuoteText');
+    const categoryInput = document.getElementById('newQuoteCategory');
+    const text = textInput.value.trim();
+    const category = categoryInput.value.trim();
 
     if (text && category) {
         quotes.push({ text, category });
-        saveQuotes(); // Persistence
-        document.getElementById('newQuoteText').value = '';
-        document.getElementById('newQuoteCategory').value = '';
-        alert("Quote added!");
+        saveQuotes();
+        populateCategories(); // Update dropdown if new category added
+        
+        textInput.value = '';
+        categoryInput.value = '';
+        alert("Quote added successfully!");
+    } else {
+        alert("Please enter both a quote and a category.");
     }
 }
 
 /**
- * Exports quotes to a JSON file
+ * Exports the quotes array as a JSON file
  */
 function exportToJsonFile() {
     const dataStr = JSON.stringify(quotes);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
     
-    const exportFileDefaultName = 'quotes.json';
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', url);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'quotes.json';
+    link.click();
 }
 
 /**
- * Imports quotes from a JSON file
+ * Imports quotes from a JSON file and merges them with existing ones
  */
 function importFromJsonFile(event) {
     const fileReader = new FileReader();
@@ -66,14 +117,19 @@ function importFromJsonFile(event) {
             const importedQuotes = JSON.parse(event.target.result);
             quotes.push(...importedQuotes);
             saveQuotes();
+            populateCategories();
             alert('Quotes imported successfully!');
-            showRandomQuote(); // Optional: Refresh display
-        } catch (error) {
-            alert('Error parsing JSON file.');
+        } catch (e) {
+            alert('Error importing JSON. Please check the file format.');
         }
     };
     fileReader.readAsText(event.target.files[0]);
 }
 
-// Initial setup
+// Event Listeners & Initialization
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
+
+window.onload = function() {
+    populateCategories();
+    filterQuotes(); // Automatically displays a quote and applies the saved filter
+};

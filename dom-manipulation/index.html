@@ -2,22 +2,43 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dynamic Quote Generator</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.5; }
+        #quoteDisplay { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; min-height: 60px; }
+        .controls { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .form-section { margin-top: 30px; padding-top: 20px; border-top: 2px solid #eee; }
+        input { padding: 8px; }
+        button { padding: 8px 15px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 4px; }
+        button:hover { background-color: #0056b3; }
+        #importFile { margin-top: 10px; }
+    </style>
 </head>
 <body>
+
     <h1>Dynamic Quote Generator</h1>
-    
+
+    <div class="controls">
+        <select id="categoryFilter" onchange="filterQuotes()">
+            <option value="all">All Categories</option>
+        </select>
+        
+        <button id="newQuote">Show New Quote</button>
+        <button onclick="exportToJsonFile()">Export Quotes (JSON)</button>
+    </div>
+
     <div id="quoteDisplay"></div>
-    <button id="newQuote">Show New Quote</button>
 
-    <hr>
+    <div>
+        <label for="importFile">Import Quotes: </label>
+        <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
+    </div>
 
-    <button onclick="exportToJsonFile()">Export Quotes</button>
-    <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
-
-    <div id="formContainer">
-        <input id="newQuoteText" type="text" placeholder="Enter quote" />
-        <input id="newQuoteCategory" type="text" placeholder="Category" />
+    <div class="form-section">
+        <h3>Add a New Quote</h3>
+        <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
+        <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
         <button onclick="addQuote()">Add Quote</button>
     </div>
 
