@@ -1,54 +1,80 @@
-// 1. Existence of the quotes array with objects containing text and category properties
-let quotes = [
+// 1. Array of quote objects with text and category
+let quotes = JSON.parse(localStorage.getItem('quotes')) || [
   { text: "The only way to do great work is to love what you do.", category: "Career" },
   { text: "Innovation distinguishes between a leader and a follower.", category: "Leadership" },
   { text: "Stay hungry, stay foolish.", category: "Life" }
 ];
 
-/**
- * 2. Check for the displayRandomQuote function
- * 3. Check for logic to select a random quote and update the DOM
- */
-function displayRandomQuote() {
-  const quoteDisplay = document.getElementById('quoteDisplay');
-  
-  // Logic to select a random quote
-  const randomIndex = Math.floor(Math.random() * quotes.length);
-  const randomQuote = quotes[randomIndex];
-
-  // Logic to update the DOM
-  quoteDisplay.innerHTML = `<p>"${randomQuote.text}"</p><p><em>- ${randomQuote.category}</em></p>`;
+// 2. Function to save quotes to local storage
+function saveQuotes() {
+  localStorage.setItem('quotes', JSON.stringify(quotes));
 }
 
-/**
- * 4. Check for the addQuote function
- * 5. Check for logic to add a new quote to the quotes array and update the DOM
- */
-function addQuote() {
-  const textInput = document.getElementById('newQuoteText');
-  const categoryInput = document.getElementById('newQuoteCategory');
+// 3. Function to show a random quote
+function showRandomQuote() {
+  const quoteDisplay = document.getElementById('quoteDisplay');
+  const randomIndex = Math.floor(Math.random() * quotes.length);
+  const quote = quotes[randomIndex];
   
-  const text = textInput.value.trim();
-  const category = categoryInput.value.trim();
+  // Update the DOM
+  quoteDisplay.innerHTML = `<p>"${quote.text}"</p><p><em>- ${quote.category}</em></p>`;
+}
 
-  // Logic to add a new quote and update the array
+// 4. Function to add a new quote
+function addQuote() {
+  const text = document.getElementById('newQuoteText').value.trim();
+  const category = document.getElementById('newQuoteCategory').value.trim();
+
   if (text && category) {
-    quotes.push({ text: text, category: category });
+    quotes.push({ text, category });
+    saveQuotes(); // Persistence
     
-    // Clear inputs after adding
-    textInput.value = '';
-    categoryInput.value = '';
+    // Clear inputs
+    document.getElementById('newQuoteText').value = '';
+    document.getElementById('newQuoteCategory').value = '';
     
     alert("Quote added successfully!");
-  } else {
-    alert("Please enter both a quote and a category.");
   }
 }
 
-/**
- * 6. Check for event listener on the “Show New Quote” button
- */
-document.getElementById('newQuote').addEventListener('click', displayRandomQuote);
+// 5. Function to create the add quote form dynamically
+function createAddQuoteForm() {
+  const container = document.createElement('div');
+  container.innerHTML = `
+    <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
+    <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
+    <button onclick="addQuote()">Add Quote</button>
+  `;
+  document.body.appendChild(container);
+}
 
-// Initial display on page load
-displayRandomQuote();
+// 6. JSON Export Function
+function exportToJsonFile() {
+  const dataStr = JSON.stringify(quotes);
+  const dataBlob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(dataBlob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'quotes.json');
+  link.click();
+}
+
+// 7. JSON Import Function (Requirement from Task 1)
+function importFromJsonFile(event) {
+  const fileReader = new FileReader();
+  fileReader.onload = function(event) {
+    const importedQuotes = JSON.parse(event.target.result);
+    quotes.push(...importedQuotes);
+    saveQuotes();
+    alert('Quotes imported successfully!');
+  };
+  fileReader.readAsText(event.target.files[0]);
+}
+
+// Event Listeners
+document.getElementById('newQuote').addEventListener('click', showRandomQuote);
+
+// Initialization
+window.onload = () => {
+  showRandomQuote();
+};
