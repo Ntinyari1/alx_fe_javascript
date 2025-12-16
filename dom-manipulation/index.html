@@ -1,47 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Quote Generator</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; line-height: 1.5; }
-        #quoteDisplay { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; min-height: 60px; }
-        .controls { margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
-        .form-section { margin-top: 30px; padding-top: 20px; border-top: 2px solid #eee; }
-        input { padding: 8px; }
-        button { padding: 8px 15px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 4px; }
-        button:hover { background-color: #0056b3; }
-        #importFile { margin-top: 10px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Quote Generator</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; max-width: 800px; margin: auto; }
+    #quoteDisplay { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9; min-height: 80px; }
+    .controls, .import-export { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    #syncStatus { color: #155724; background-color: #d4edda; padding: 10px; border-radius: 5px; display: none; margin-bottom: 15px; border: 1px solid #c3e6cb; }
+    input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; flex: 1; }
+    button { padding: 8px 15px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 4px; }
+    button:hover { background-color: #0056b3; }
+    .form-section { background: #eee; padding: 15px; border-radius: 8px; }
+  </style>
 </head>
 <body>
 
-    <h1>Dynamic Quote Generator</h1>
+  <h1>Dynamic Quote Generator</h1>
 
-    <div class="controls">
-        <select id="categoryFilter" onchange="filterQuotes()">
-            <option value="all">All Categories</option>
-        </select>
-        
-        <button id="newQuote">Show New Quote</button>
-        <button onclick="exportToJsonFile()">Export Quotes (JSON)</button>
-    </div>
+  <div id="syncStatus">Quotes synced with server!</div>
 
-    <div id="quoteDisplay"></div>
+  <div class="controls">
+    <select id="categoryFilter" onchange="filterQuotes()">
+      <option value="all">All Categories</option>
+    </select>
+    <button id="newQuote">Show New Quote</button>
+  </div>
 
-    <div>
-        <label for="importFile">Import Quotes: </label>
-        <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
-    </div>
+  <div id="quoteDisplay"></div>
 
-    <div class="form-section">
-        <h3>Add a New Quote</h3>
+  <div class="import-export">
+    <button onclick="exportToJsonFile()">Export Quotes</button>
+    <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
+  </div>
+
+  <div class="form-section">
+    <h3>Add a New Quote</h3>
+    <div style="display: flex; flex-direction: column; gap: 10px;">
         <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
         <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
         <button onclick="addQuote()">Add Quote</button>
     </div>
+  </div>
 
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
